@@ -1,27 +1,18 @@
 package main
 
-import (
-	"fmt"
-
-	log "github.com/Sirupsen/logrus"
-	flags "github.com/jessevdk/go-flags"
-)
+import "fmt"
+import "log"
 
 var version string = "undef"
 
-type Options struct {
-	Debug bool `env:"DEBUG"    long:"debug"    description:"enable debug"`
-}
-
 func main() {
-	var opts Options
+	// Start our runner.
+	go runner()
 
-	_, err := flags.Parse(&opts)
-	if err != nil {
-		os.Exit(1)
-	}
+	// Block until we're told to quit.
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt, os.Kill)
 
-	if opts.Debug {
-		log.SetLevel(log.DebugLevel)
-	}
+	s := <-c
+	log.Printf("Caught signal '%d', exiting.", s)
 }
